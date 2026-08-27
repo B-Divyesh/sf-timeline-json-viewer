@@ -1,0 +1,40 @@
+{
+  "slug": "timeline-json-viewer",
+  "title": "Local viewer for exported Google Maps Timeline JSON",
+  "user": "Anyone who exported Timeline/Location History (Takeout or on-device export) after Google moved it on-device and now holds a JSON file they cannot open; job: browse days, visits and trips on a map and export CSV/GPX.",
+  "evidence": [
+    {
+      "url": "https://news.ycombinator.com/item?id=43466454",
+      "date": "2025-03",
+      "quote_or_summary": "Ask HN for a Timeline alternative after the new UI became sluggish and history was lost migrating devices."
+    },
+    {
+      "url": "https://support.google.com/maps/thread/328500148/how-to-import-json-to-my-google-map-timeline",
+      "date": "2025-03",
+      "quote_or_summary": "User exported timeline for backup and now has 'just a json file that I don't have a way to view or re-import.'"
+    },
+    {
+      "url": "https://support.google.com/maps/thread/330064430/timeline-not-showing-up?hl=en",
+      "date": "2025-03",
+      "quote_or_summary": "Wave of reports of Timeline data vanishing from early March 2025; advice is to rely on the JSON backup."
+    },
+    {
+      "url": "https://news.ycombinator.com/item?id=49012967",
+      "date": "2026-07",
+      "quote_or_summary": "'Losing a decade of my Google Maps Timeline data even with backups enabled made me realise...'"
+    }
+  ],
+  "recurrence": "Multiple Google Maps Community threads titled 'how can I view the exported location history', 'view Timeline from a JSON file', 'convert or view Timeline.json' across 2023–2025, plus HN threads in 2025 and 2026; severity moderate (sentimental/legal records).",
+  "current_workaround": "Open JSON in a text editor; Python scripts on GitHub; ask ChatGPT to convert to CSV; self-host GPStracker/Timelinize.",
+  "incumbents_and_gap": "timelineviewer.pages.dev (single-purpose hobby page, unclear maintenance, no export), Timelinize (desktop app, broad scope), GPStracker (self-hosted). Gap: a maintained, no-upload web viewer that handles both legacy Location History and new on-device Timeline.json schemas, with day picker, place list and CSV/GPX/KML export.",
+  "smallest_useful_product": "Static PWA: drop Timeline.json / Records.json; parse in a worker; map (Leaflet + OSM tiles) with day calendar, visit list, path polylines, search by place name; export selected range to CSV/GPX. No upload, no account, no cross-device sync, no analytics of location data.",
+  "success_measure": ">=60% of files dropped render a map within 10 s for files up to 200 MB; >=25% of sessions export something.",
+  "artifact_class": "pwa-offline",
+  "monetization": "free — sensitive data; any server component would destroy trust. Possible later one-time fee for offline tile packs.",
+  "constraints": "Google changes the export schema (semanticSegments vs timelineObjects); very large files need streaming parse; OSM tile usage policy requires attribution and modest load; must state clearly nothing leaves the device.",
+  "est_build_effort": "M",
+  "why_distinct": "Purpose-built for the post-2025 on-device Timeline format with export, rather than a generic GPS dashboard or a script.",
+  "confidence": 4,
+  "territory": "utilities",
+  "state": "RESEARCHED"
+}
