@@ -1,0 +1,20 @@
+{
+  "timelineObjects": [
+    {
+      "placeVisit": {
+        "location": { "latitudeE7": 515074000, "longitudeE7": -1278000, "name": "Library & Archive", "address": "10 King's Rd" },
+        "duration": { "startTimestamp": "2024-02-29T23:30:00+01:00", "endTimestamp": "2024-03-01T00:30:00+01:00" }
+      }
+    },
+    {
+      "activitySegment": {
+        "activityType": "WALKING",
+        "distance": 850,
+        "duration": { "startTimestamp": "2024-03-01T08:00:00Z", "endTimestamp": "2024-03-01T08:20:00Z" },
+        "startLocation": { "latitudeE7": 515074000, "longitudeE7": -1278000 },
+        "waypointPath": { "waypoints": [{ "latE7": 515100000, "lngE7": -1200000 }] },
+        "endLocation": { "latitudeE7": 515120000, "longitudeE7": -1150000 }
+      }
+    }
+  ]
+}

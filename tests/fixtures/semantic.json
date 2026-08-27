@@ -1,0 +1,24 @@
+{
+  "semanticSegments": [
+    {
+      "startTime": "2025-03-01T09:00:00-05:00",
+      "endTime": "2025-03-01T10:15:00-05:00",
+      "visit": {
+        "topCandidate": {
+          "placeName": "Museum, Hall \"A\"",
+          "placeAddress": "1 Main St\nSpringfield",
+          "placeLocation": { "latLng": "geo:40.7128,-74.0060" }
+        }
+      }
+    },
+    {
+      "startTime": "2025-03-01T10:15:00-05:00",
+      "endTime": "2025-03-01T10:45:00-05:00",
+      "activity": { "topCandidate": { "type": "IN_PASSENGER_VEHICLE" }, "distanceMeters": 4200 },
+      "timelinePath": [
+        { "point": "geo:40.7128,-74.0060", "time": "2025-03-01T10:15:00-05:00" },
+        { "point": "geo:40.7350,-73.9900", "time": "2025-03-01T10:45:00-05:00" }
+      ]
+    }
+  ]
+}

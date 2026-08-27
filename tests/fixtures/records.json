@@ -1,0 +1,6 @@
+{
+  "locations": [
+    { "latitudeE7": 377749000, "longitudeE7": -1224194000, "timestamp": "2023-07-01T12:00:00Z" },
+    { "latitudeE7": 377759000, "longitudeE7": -1224184000, "timestampMs": "1688212860000" }
+  ]
+}

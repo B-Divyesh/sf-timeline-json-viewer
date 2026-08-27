@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Field Atlas folded map mark">
+  <rect width="192" height="192" rx="32" fill="#182221"/>
+  <path d="M29 48 74 30l44 18 45-18v114l-45 18-44-18-45 18Z" fill="#F3ECDD" stroke="#F3ECDD" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M74 30v114m44-96v114" fill="none" stroke="#2B7184" stroke-width="6" opacity=".65"/>
+  <path d="M45 126c17-7 19-27 37-30 21-4 30 26 51 14 12-7 11-25 23-36" fill="none" stroke="#C34E32" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="45" cy="126" r="9" fill="#6C7B50" stroke="#F3ECDD" stroke-width="5"/>
+  <circle cx="156" cy="74" r="9" fill="#C34E32" stroke="#F3ECDD" stroke-width="5"/>
+</svg>
