@@ -28,6 +28,7 @@ test('restores the imported archive with the network offline', async ({ page, co
   await expect(page.getByText('Offline')).toBeVisible();
   await page.reload();
   await expect(page.getByText('Library & Archive')).toBeVisible();
+  await expect(page.locator('.connection')).toContainText('Offline');
   await expect(page.getByRole('button', { name: 'Export GPX' })).toBeEnabled();
 });
 

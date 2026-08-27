@@ -31,11 +31,13 @@ npm run dev
 npm run check
 npm test
 npm run build
+npm run check:bundle
 npx playwright install chromium   # first time only
 npm run test:e2e
+npm run test:axe
 ```
 
-`npm run build` creates the deployable static site in `dist/`. The browser suite covers desktop, Pixel-sized mobile, import/search/export controls, persistence, a service-worker-controlled offline reload, console errors, and serious/critical axe violations.
+`npm run build` creates the deployable static site in `dist/`. The browser suite covers desktop and Pixel-sized mobile, import through the real file chooser, calendar keyboard navigation, production Leaflet asset loading and attribution, persistence, first-install privacy stability, a service-worker-controlled offline reload, console errors, and populated-state serious/critical axe violations. `npm run check:bundle` enforces the initial-load JavaScript, CSS, and font budgets.
 
 ## Deploy
 

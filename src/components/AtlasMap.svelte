@@ -3,10 +3,12 @@
   import type { TimelineEvent, Point } from '../lib/types';
   export let events: TimelineEvent[] = [];
   export let online = false;
+  export let connected = false;
   export let ononlinechange: (value: boolean) => void;
 
   let mapElement: HTMLDivElement;
   let leafletMap: any;
+  let loadingMap = false;
   let loadError = '';
   $: points = events.flatMap((event) => event.points).filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lng));
   $: bounds = getBounds(points);
@@ -32,7 +34,9 @@
   }
 
   async function buildOnlineMap() {
-    if (leafletMap) return;
+    if (leafletMap || loadingMap) return;
+    loadingMap = true;
+    loadError = '';
     try {
       const L = await import('leaflet');
       await import('leaflet/dist/leaflet.css');
@@ -53,6 +57,8 @@
       loadError = 'Street tiles could not be loaded. The private atlas view still works.';
       online = false;
       ononlinechange(false);
+    } finally {
+      loadingMap = false;
     }
   }
 
@@ -66,7 +72,7 @@
       <h2 id="map-title">Routes for this day</h2>
     </div>
     <label class="tile-switch" title="This makes requests to OpenStreetMap tile servers. Your source file is never sent.">
-      <input type="checkbox" checked={online} on:change={(event) => ononlinechange(event.currentTarget.checked)} disabled={!navigator.onLine} />
+      <input type="checkbox" checked={online} on:change={(event) => ononlinechange(event.currentTarget.checked)} disabled={!connected} />
       <span>Street tiles</span>
     </label>
   </div>

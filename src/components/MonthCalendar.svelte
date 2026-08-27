@@ -1,13 +1,18 @@
 <script lang="ts">
+  import { tick } from 'svelte';
+
   export let selected: string;
   export let dates: string[] = [];
   export let onselect: (date: string) => void;
 
   let month = selected?.slice(0, 7) || new Date().toISOString().slice(0, 7);
   let lastSelected = selected;
+  let focusedDate = selected;
+  let daysElement: HTMLDivElement;
   $: if (selected && selected !== lastSelected) {
     lastSelected = selected;
     month = selected.slice(0, 7);
+    focusedDate = selected;
   }
   $: [year, monthNumber] = month.split('-').map(Number);
   $: firstDay = new Date(Date.UTC(year, monthNumber - 1, 1)).getUTCDay();
@@ -15,10 +20,50 @@
   $: cells = Array.from({ length: firstDay + dayCount }, (_, index) => index < firstDay ? null : index - firstDay + 1);
   $: dateSet = new Set(dates);
   $: monthLabel = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${month}-01T00:00:00Z`));
+  $: tabbableDate = focusedDate.startsWith(month)
+    ? focusedDate
+    : selected.startsWith(month)
+      ? selected
+      : `${month}-01`;
 
   function shift(delta: number) {
     const date = new Date(Date.UTC(year, monthNumber - 1 + delta, 1));
     month = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+  }
+
+  function formatDate(date: Date): string {
+    return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+  }
+
+  async function moveFocus(date: Date) {
+    focusedDate = formatDate(date);
+    month = focusedDate.slice(0, 7);
+    await tick();
+    daysElement.querySelector<HTMLButtonElement>(`[data-date="${focusedDate}"]`)?.focus();
+  }
+
+  function moveByMonth(date: Date, delta: number): Date {
+    const day = date.getUTCDate();
+    const target = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + delta, 1));
+    const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+    target.setUTCDate(Math.min(day, lastDay));
+    return target;
+  }
+
+  function handleDayKey(event: KeyboardEvent, fullDate: string) {
+    const date = new Date(`${fullDate}T00:00:00Z`);
+    let target: Date | undefined;
+    if (event.key === 'ArrowLeft') target = new Date(date.valueOf() - 86_400_000);
+    if (event.key === 'ArrowRight') target = new Date(date.valueOf() + 86_400_000);
+    if (event.key === 'ArrowUp') target = new Date(date.valueOf() - 7 * 86_400_000);
+    if (event.key === 'ArrowDown') target = new Date(date.valueOf() + 7 * 86_400_000);
+    if (event.key === 'Home') target = new Date(date.valueOf() - date.getUTCDay() * 86_400_000);
+    if (event.key === 'End') target = new Date(date.valueOf() + (6 - date.getUTCDay()) * 86_400_000);
+    if (event.key === 'PageUp') target = moveByMonth(date, -1);
+    if (event.key === 'PageDown') target = moveByMonth(date, 1);
+    if (!target) return;
+    event.preventDefault();
+    void moveFocus(target);
   }
 </script>
 
@@ -31,7 +76,7 @@
   <div class="weekdays" aria-hidden="true">
     {#each ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as day}<span>{day}</span>{/each}
   </div>
-  <div class="days" role="grid" aria-label={monthLabel}>
+  <div class="days" role="group" aria-label={`${monthLabel} calendar days`} bind:this={daysElement}>
     {#each cells as day}
       {#if day === null}
         <span class="blank"></span>
@@ -39,10 +84,14 @@
         {@const fullDate = `${month}-${String(day).padStart(2, '0')}`}
         <button
           type="button"
+          data-date={fullDate}
+          tabindex={tabbableDate === fullDate ? 0 : -1}
           class:has-data={dateSet.has(fullDate)}
           class:selected={selected === fullDate}
           aria-label={`${fullDate}${dateSet.has(fullDate) ? ', has timeline entries' : ', no entries'}`}
           aria-pressed={selected === fullDate}
+          on:focus={() => focusedDate = fullDate}
+          on:keydown={(event) => handleDayKey(event, fullDate)}
           on:click={() => onselect(fullDate)}>{day}</button>
       {/if}
     {/each}

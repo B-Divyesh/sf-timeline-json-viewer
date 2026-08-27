@@ -1,4 +1,4 @@
-const VERSION = 'field-atlas-v1.0.1';
+const VERSION = 'field-atlas-v1.0.2';
 const SHELL = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 const PRECACHE = [
@@ -39,6 +39,12 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname === '/online-check.txt') {
+    event.respondWith(fetch(event.request).catch(() => new Response('offline', {
+      headers: { 'Content-Type': 'text/plain', 'X-Field-Atlas-Connection': 'offline' }
+    })));
+    return;
+  }
   if (event.request.mode === 'navigate') {
     event.respondWith(caches.match('/index.html').then((cached) => cached || fetch(event.request).catch(() => caches.match('/offline.html'))));
     return;

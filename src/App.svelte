@@ -17,9 +17,12 @@
   let error = '';
   let restored = false;
   let dragging = false;
-  let online = navigator.onLine;
+  let online = false;
+  let connectionKnown = false;
+  let connectionCheck = 0;
   let streetTiles = false;
   let updateWaiting: ServiceWorker | null = null;
+  let reloadForUpdate = false;
   let privacyDialog: HTMLDialogElement;
   const page = location.pathname;
   const isLegal = page === '/privacy' || page === '/terms';
@@ -33,6 +36,7 @@
 
   onMount(() => {
     void initialize();
+    void checkConnection();
     window.addEventListener('online', connectionChange);
     window.addEventListener('offline', connectionChange);
     return () => {
@@ -64,13 +68,41 @@
           if (registration.waiting && navigator.serviceWorker.controller) updateWaiting = registration.waiting;
         });
       });
-      navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloadForUpdate) location.reload();
+      });
     }
   }
 
   function connectionChange() {
-    online = navigator.onLine;
-    if (!online) streetTiles = false;
+    if (!navigator.onLine) {
+      connectionCheck += 1;
+      setConnection(false);
+      return;
+    }
+    connectionKnown = false;
+    void checkConnection();
+  }
+
+  function setConnection(value: boolean) {
+    online = value;
+    connectionKnown = true;
+    if (!value) streetTiles = false;
+  }
+
+  async function checkConnection() {
+    const check = ++connectionCheck;
+    if (!navigator.onLine) {
+      setConnection(false);
+      return;
+    }
+    try {
+      const response = await fetch(`/online-check.txt?check=${Date.now()}`, { cache: 'no-store' });
+      const available = response.ok && response.headers.get('X-Field-Atlas-Connection') !== 'offline';
+      if (check === connectionCheck) setConnection(available);
+    } catch {
+      if (check === connectionCheck) setConnection(false);
+    }
   }
 
   function matches(event: TimelineEvent, value: string): boolean {
@@ -98,9 +130,13 @@
   }
 
   async function chooseFile(event: Event) {
-    const file = (event.currentTarget as HTMLInputElement).files?.[0];
-    if (file) await importFile(file);
-    (event.currentTarget as HTMLInputElement).value = '';
+    const input = event.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    try {
+      if (file) await importFile(file);
+    } finally {
+      input.value = '';
+    }
   }
 
   async function importFile(file: File) {
@@ -110,28 +146,37 @@
     importing = true;
     progress = 2;
     progressMessage = 'Opening a local worker…';
-    const worker = new Worker(new URL('./lib/parser.worker.ts', import.meta.url), { type: 'module' });
-    worker.onmessage = async (event: MessageEvent<WorkerResponse>) => {
-      const message = event.data;
-      if (message.type === 'progress') { progress = message.progress; progressMessage = message.message; }
-      if (message.type === 'error') { error = message.message; importing = false; worker.terminate(); }
-      if (message.type === 'complete') {
-        try {
-          await saveDataset(message.dataset);
-          dataset = message.dataset;
-          const foundDates = [...new Set(dataset.events.map((item) => item.date))].sort();
-          selectedDate = foundDates.at(-1) ?? '';
-          rangeStart = foundDates[0] ?? '';
-          rangeEnd = foundDates.at(-1) ?? '';
-          progress = 100;
-          progressMessage = `${dataset.events.length.toLocaleString()} entries saved on this device.`;
-        } catch { error = 'The file parsed, but this browser did not have enough local storage to save it.'; }
+    await new Promise<void>((resolve) => {
+      const worker = new Worker(new URL('./lib/parser.worker.ts', import.meta.url), { type: 'module' });
+      const finish = () => {
         importing = false;
         worker.terminate();
-      }
-    };
-    worker.onerror = () => { error = 'The background parser stopped unexpectedly. Try closing other tabs and importing again.'; importing = false; worker.terminate(); };
-    worker.postMessage({ file });
+        resolve();
+      };
+      worker.onmessage = async (event: MessageEvent<WorkerResponse>) => {
+        const message = event.data;
+        if (message.type === 'progress') { progress = message.progress; progressMessage = message.message; }
+        if (message.type === 'error') { error = message.message; finish(); }
+        if (message.type === 'complete') {
+          try {
+            await saveDataset(message.dataset);
+            dataset = message.dataset;
+            const foundDates = [...new Set(dataset.events.map((item) => item.date))].sort();
+            selectedDate = foundDates.at(-1) ?? '';
+            rangeStart = foundDates[0] ?? '';
+            rangeEnd = foundDates.at(-1) ?? '';
+            progress = 100;
+            progressMessage = `${dataset.events.length.toLocaleString()} entries saved on this device.`;
+          } catch { error = 'The file parsed, but this browser did not have enough local storage to save it.'; }
+          finish();
+        }
+      };
+      worker.onerror = () => {
+        error = 'The background parser stopped unexpectedly. Try closing other tabs and importing again.';
+        finish();
+      };
+      worker.postMessage({ file });
+    });
   }
 
   async function drop(event: DragEvent) {
@@ -144,6 +189,12 @@
   function acknowledgePrivacy() {
     localStorage.setItem('field-atlas-privacy-seen', '1');
     privacyDialog.close();
+  }
+
+  function activateUpdate() {
+    if (!updateWaiting) return;
+    reloadForUpdate = true;
+    updateWaiting.postMessage({ type: 'SKIP_WAITING' });
   }
 
   function exportRange(format: 'csv' | 'gpx') {
@@ -173,7 +224,7 @@
     <div><h1>Field Atlas</h1><p>Local timeline viewer</p></div>
   </a>
   <div class="status-group">
-    <span class:offline={!online} class="connection"><span aria-hidden="true">●</span> {online ? 'Online' : 'Offline'}</span>
+    <span class:offline={connectionKnown && !online} class="connection" aria-live="polite"><span aria-hidden="true">●</span> {connectionKnown ? online ? 'Online' : 'Offline' : 'Checking'}</span>
     {#if !isLegal}<label class="import-button"><input type="file" accept=".json,application/json" on:change={chooseFile} /><span>{dataset ? 'Import another' : 'Open JSON'}</span></label>{/if}
   </div>
 </header>
@@ -250,7 +301,7 @@
           </ol>
         </aside>
         <div class="map-and-export">
-          <AtlasMap events={selectedEvents} online={streetTiles && online} ononlinechange={(value) => streetTiles = value} />
+          <AtlasMap events={selectedEvents} online={streetTiles && online} connected={online} ononlinechange={(value) => streetTiles = value} />
           <section class="export-strip" aria-labelledby="export-title">
             <div><p class="eyebrow">Take a copy</p><h2 id="export-title">Export a date range</h2></div>
             <label>From<input type="date" min={dates[0]} max={dates.at(-1)} bind:value={rangeStart} /></label>
@@ -269,7 +320,7 @@
 
 <footer><span>Field Atlas · your timeline stays yours</span><nav aria-label="Legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://github.com/B-Divyesh/sf-timeline-json-viewer">Source</a></nav></footer>
 
-{#if updateWaiting}<div class="update-toast" role="status"><span>A fresh atlas is ready.</span><button type="button" on:click={() => updateWaiting?.postMessage({ type: 'SKIP_WAITING' })}>Update now</button></div>{/if}
+{#if updateWaiting}<div class="update-toast" role="status"><span>A fresh atlas is ready.</span><button type="button" on:click={activateUpdate}>Update now</button></div>{/if}
 
 <dialog bind:this={privacyDialog} class="privacy-dialog" on:cancel={(event) => event.preventDefault()}>
   <div class="dialog-mark" aria-hidden="true">⌖</div>

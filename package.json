@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "check:bundle": "node scripts/check-bundle.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
+    "test:axe": "playwright test e2e/release-blockers.spec.ts --grep axe",
     "test:e2e": "playwright test",
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
