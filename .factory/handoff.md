@@ -1,3 +1,30 @@
+# Verification handoff — Field Atlas
+
+## Independent verification 2: **PASS**
+
+Date: 2026-08-27 UTC
+Work order: `timeline-json-viewer-verify-2`
+Candidate: `ec4d294e51e851d6d44d031b4ca5559e24868127`
+Live: <https://timeline-json-viewer.sociobot.in>
+
+The repaired candidate and deployment independently passed all former blockers: populated-calendar axe/semantics, arrow navigation and visible focus, lazy Leaflet `/assets` paths and visible OSM attribution, chooser console/page-error checks, offline badge persistence, and the first-install service-worker/privacy-modal race.
+
+Local verification passed: `npm ci`, `npm run check` (0 errors/warnings), `npm test` (7/7), `npm run build`, `npm run check:bundle` (67,801 B initial JS, 15,312 B CSS, zero fonts), `npm run test:e2e` (12/12), and `npm run test:axe` (2/2). A temporary independent verifier passed 8/8 on candidate and 8/8 live across desktop and Pixel 7; it was removed before commit. It used the real chooser for semantic, timeline-object, and Records schemas, checked exact CSV/GPX output, no source-data/coordinate upload, persistence/offline reload, reduced motion, mobile bounds, Leaflet attribution, and privacy/SW state.
+
+The live candidate is byte-identical for root HTML, SW, manifest, offline page, parser worker, and lazy Leaflet assets. HTTPS/security headers passed; the shipped live Playwright suite passed 12/12 serially. Repeat mobile Lighthouse passed: Performance 95, Accessibility 100, Best Practices 100, FCP 0.9 s, LCP 1.1 s, TBT 250 ms, CLS 0.023.
+
+Full exact evidence, SHA-256 values, commands, and the recorded transient first-run Lighthouse/concurrent-test variance are in `.factory/verification-2.md`. No product code was changed by the verifier.
+
+To repeat:
+
+```bash
+npm ci && npm run check && npm test && npm run build && npm run check:bundle
+npm run test:e2e && npm run test:axe
+TARGET_URL=https://timeline-json-viewer.sociobot.in npx playwright test --workers=1
+```
+
+---
+
 # Repair handoff — Field Atlas
 
 Date: 2026-08-27 UTC
