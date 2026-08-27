@@ -46,6 +46,8 @@ npm run test:e2e
 
 Deploy the contents of `dist/` to Azure Static Web Apps. `staticwebapp.config.json` is included in the output for navigation fallback and security headers. The Param Factory owns infrastructure/DNS; this repository intentionally does not mutate them.
 
+Release commits `772ac63` and `5f990a1` were pushed to `origin/main`. A post-push request to `https://timeline-json-viewer.sociobot.in` returned `Could not resolve host` from the worker, so live desktop/mobile verification is pending the factory-owned Azure/DNS deployment. The identical production `dist/` was verified locally on desktop and mobile as detailed above.
+
 ## Honest limits / next work
 
 - Google has no stable public schema. Only the structures and fields represented by the synthetic fixtures are claimed. New wrappers or renamed fields need new anonymized/synthetic regression fixtures.
