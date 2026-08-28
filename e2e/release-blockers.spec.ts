@@ -25,3 +25,13 @@ test('viewer still works when service workers are unavailable', async ({ browser
   expect(errors).toEqual([]);
   await context.close();
 });
+
+test('every public route is axe-clean with one page heading and a main landmark', async ({ page }) => {
+  for (const route of ['/', '/demo', '/privacy', '/terms', '/404.html']) {
+    await page.goto(route);
+    await expect(page.locator('main')).toHaveCount(1);
+    await expect(page.locator('h1')).toHaveCount(1);
+    const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+    expect(result.violations.filter((item) => ['serious', 'critical'].includes(item.impact ?? '')), route).toEqual([]);
+  }
+});

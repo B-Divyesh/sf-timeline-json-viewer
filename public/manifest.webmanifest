@@ -1,9 +1,9 @@
 {
-  "name": "Field Atlas — Local Timeline Viewer",
+  "name": "Field Atlas — Local Timeline JSON Viewer",
   "short_name": "Field Atlas",
   "description": "Privately browse and export Google Maps Timeline JSON on your device.",
   "id": "/",
-  "start_url": "/?source=pwa-v2",
+  "start_url": "/?source=pwa-v3",
   "scope": "/",
   "display": "standalone",
   "background_color": "#F3ECDD",

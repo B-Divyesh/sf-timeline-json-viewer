@@ -27,13 +27,41 @@ async function demo(page: import('@playwright/test').Page) {
   await expect(page.getByText('Harbor City Museum')).toBeVisible();
 }
 
-test('@claim:demo-isolation opens sample data in an isolated store', async ({ page }) => {
-  await demo(page);
-  const names = await page.evaluate(async () => indexedDB.databases().then((items) => items.map((item) => item.name)));
-  expect(names).toContain('demo:field-atlas-v1');
-  expect(names).not.toContain('field-atlas-v1');
+test('@claim:demo-isolation keeps every demo entry path separate from a saved timeline', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('input[type=file]').first().setInputFiles(fixture('semantic.json'));
+  await expect(page.getByText('Museum, Hall "A"')).toBeVisible();
+  const realBefore = await archiveValue(page, 'field-atlas-v1');
+
+  await page.getByLabel('Primary').getByRole('link', { name: 'Demo' }).click();
+  await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
+  await expect(page.locator('.archive-meta')).toContainText('Sample Timeline JSON');
+  await expect(page.getByText('Juniper Cafe')).toBeVisible();
+  await expect(page.getByText('Museum, Hall "A"')).toHaveCount(0);
+  expect(await archiveValue(page, 'field-atlas-v1')).toEqual(realBefore);
+  expect(await archiveValue(page, 'demo:field-atlas-v1')).toMatchObject({ name: 'Sample Timeline JSON' });
+
+  await page.getByRole('button', { name: '2026-08-18, has timeline entries' }).click();
+  await page.getByLabel('Search places and activities').fill('museum');
+  await page.getByRole('button', { name: 'Reset demo' }).click();
+  await expect(page.getByLabel('Search places and activities')).toHaveValue('');
+  await expect(page.getByText('Juniper Cafe')).toBeVisible();
+
   await page.getByRole('button', { name: 'Start for real' }).click();
-  await expect(page.getByRole('heading', { name: 'Browse your exported Google Timeline' })).toBeVisible();
+  await expect(page.locator('.archive-meta')).toContainText('semantic.json');
+  await expect(page.getByText('Museum, Hall "A"')).toBeVisible();
+  expect(await archiveValue(page, 'field-atlas-v1')).toEqual(realBefore);
+
+  for (const legalRoute of ['/privacy', '/terms']) {
+    await page.goto(legalRoute);
+    await page.getByLabel('Primary').getByRole('link', { name: 'Demo' }).click();
+    await expect(page.locator('.archive-meta')).toContainText('Sample Timeline JSON');
+    await expect(page.getByText('Juniper Cafe')).toBeVisible();
+    await expect(page.getByText('Museum, Hall "A"')).toHaveCount(0);
+    expect(await archiveValue(page, 'field-atlas-v1')).toEqual(realBefore);
+    await page.getByRole('button', { name: 'Start for real' }).click();
+    await expect(page.locator('.archive-meta')).toContainText('semantic.json');
+  }
 });
 test('@claim:offline-reload keeps the shipped sample usable offline after first visit', async ({ page, context }) => {
   await demo(page); await page.evaluate(() => navigator.serviceWorker.ready); await context.setOffline(true); await page.reload();
@@ -47,6 +75,9 @@ test('@claim:import-formats opens Timeline, Takeout, and Records fixtures', asyn
 });
 test('@claim:import-browse shows visits, trips, map text, and search in the sample', async ({ page }) => {
   await demo(page); await expect(page.getByText('Riverfront Market')).toBeVisible(); await expect(page.getByText('Walk to the museum')).toBeVisible(); await expect(page.getByLabel('Text itinerary for the coordinate map')).toBeVisible();
+  const sample = await archiveValue(page, 'demo:field-atlas-v1') as { events: { kind: string; activity?: string }[] };
+  expect(sample.events.filter((item) => item.kind === 'visit')).toHaveLength(3);
+  expect(sample.events.filter((item) => item.kind === 'trip').map((item) => item.activity)).toEqual(['WALKING', 'CYCLING']);
   await page.getByLabel('Search places and activities').fill('museum'); await expect(page.getByText('Harbor City Museum')).toBeVisible();
 });
 test('@claim:csv-export downloads an exact CSV range', async ({ page }) => {
@@ -119,4 +150,9 @@ test('@claim:file-size-limit rejects a file larger than 200 MB before parsing', 
   await fs.writeFile(file, '{}'); await fs.truncate(file, 201 * 1024 * 1024);
   try { await page.goto('/'); await page.locator('input[type=file]').first().setInputFiles(file); await expect(page.getByRole('alert')).toContainText('larger than 200 MB'); }
   finally { await fs.unlink(file); }
+});
+test('@claim:free-to-use shows no payment or purchase path', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.trust-list li').filter({ hasText: 'Free to use' })).toBeVisible();
+  await expect(page.locator('a[href*="pay"], a[href*="billing"], a[href*="checkout"], button', { hasText: /buy|pay|subscribe|upgrade/i })).toHaveCount(0);
 });

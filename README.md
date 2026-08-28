@@ -35,11 +35,11 @@ Run every declared product claim from a clean clone:
 node -e "for (const claim of require('./.factory/claims.json')) console.log(claim.test)" | while read command; do eval "$command"; done
 ```
 
-`npm run build` creates `dist/`. Deploy that directory to Azure Static Web Apps. The service worker precaches the app shell and the shipped sample route.
+`npm run build` creates `dist/`. Deploy that directory to Azure Static Web Apps.
 
 ## Privacy and limits
 
-A saved timeline stays in this browser until you remove it or clear site data. Optional tile requests send map-image GETs, not Timeline JSON data.
+A saved timeline stays in this browser until you remove it or clear site data. Optional tile requests fetch map images. They never include Timeline JSON data.
 
 Google changes export formats. Keep the original Timeline JSON as your backup.
 
