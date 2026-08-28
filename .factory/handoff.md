@@ -1,3 +1,34 @@
+# Adversarial review 1 handoff — Field Atlas
+
+Date: 2026-08-28 UTC
+
+Work order: `timeline-json-viewer-review-1`
+
+Candidate: `592e17a325c51af80699a3da0f5ee28b43da2b56`
+
+Verdict: **FAIL**
+
+The full review is in `.factory/review-1.md`. No product code was changed. The review documents 59 findings. The blocking findings are the unclear modal-gated cold first screen, missing one-click sample demo and isolated demo storage, missing `.factory/claims.json` and claim-tagged tests, and unknown routes returning the normal importer with HTTP 200.
+
+Verification used fresh mobile (390 × 844) and desktop (1440 × 900) Chromium contexts, live request logs, direct route/status checks, a fresh local clone, and the repository’s full quality gates. Local checks passed: `npm ci`, `npm run check`, 7/7 unit tests, build, bundle budget, 12/12 browser tests, and 2/2 populated-state axe tests. The full serial live suite passed 9/12 on its first run; all three failures passed when rerun individually. Normal live import/search traffic was same-origin GET-only with no fixture place or coordinate leakage. `/demo` did not load sample data and wrote the ordinary privacy key.
+
+All six previously repaired findings were rechecked and remain fixed: calendar semantics, arrow-key focus, Leaflet asset loading/attribution, chooser console errors, offline status after reload, and the first-install worker/privacy race. The visual identity remains distinct. KML export is the concrete missed-leverage feature; AI and sync are not appropriate for this local privacy tool.
+
+To reproduce the main checks:
+
+```sh
+npm ci
+npm run check
+npm test
+npm run build
+npm run check:bundle
+npm run test:e2e
+npm run test:axe
+TARGET_URL=https://timeline-json-viewer.sociobot.in npx playwright test --workers=1
+```
+
+---
+
 # Verification handoff — Field Atlas
 
 ## Independent verification 2: **PASS**
