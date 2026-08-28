@@ -1,8 +1,7 @@
-const VERSION = 'field-atlas-v1.0.4';
+const VERSION = 'field-atlas-v1.0.5';
 const SHELL = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 const PRECACHE = [
-  '/',
   '/index.html',
   '/offline.html',
   '/manifest.webmanifest',

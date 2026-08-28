@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+test.use({ serviceWorkers: 'block' });
+
 test('demo is keyboard usable, axe-clean, mobile-safe, and has no console errors', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));

@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import path from 'node:path';
 
 const fixture = (name: string) => path.resolve('tests/fixtures', name);
+test.use({ serviceWorkers: 'block' });
 
 test('first screen names the job and opens the sample in one click', async ({ page }) => {
   await page.goto('/');

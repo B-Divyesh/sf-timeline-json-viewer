@@ -25,10 +25,14 @@
   $: canonicalPath = demoMode ? '/demo' : path;
 
   onMount(() => {
-    void initialize(path, query); void registerServiceWorker(); void checkConnection();
+    void initialize(path, query); void checkConnection();
+    let registrationTimer: number | undefined;
+    const startRegistration = () => { registrationTimer = window.setTimeout(() => void registerServiceWorker(), 250); };
+    if (document.readyState === 'complete') startRegistration();
+    else window.addEventListener('load', startRegistration, { once: true });
     const pop = () => void changeRoute(location.pathname, location.search, false);
     window.addEventListener('popstate', pop); window.addEventListener('online', connectionChange); window.addEventListener('offline', connectionChange);
-    return () => { window.removeEventListener('popstate', pop); window.removeEventListener('online', connectionChange); window.removeEventListener('offline', connectionChange); };
+    return () => { window.removeEventListener('load', startRegistration); if (registrationTimer) window.clearTimeout(registrationTimer); window.removeEventListener('popstate', pop); window.removeEventListener('online', connectionChange); window.removeEventListener('offline', connectionChange); };
   });
   function routeState(nextPath: string, nextQuery: string) {
     const nextDemoMode = nextPath === '/demo' || new URLSearchParams(nextQuery).get('demo') === '1';

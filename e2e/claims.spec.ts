@@ -4,6 +4,9 @@ import { promises as fs } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 const fixture = (name: string) => path.resolve('tests/fixtures', name);
+// Only the offline claim needs a worker. Blocking it elsewhere prevents dozens
+// of redundant live registrations from competing with route navigation.
+test.use({ serviceWorkers: 'block' });
 async function archiveValue(page: import('@playwright/test').Page, database: string) {
   return page.evaluate(async (name) => {
     const found = await indexedDB.databases();
@@ -63,9 +66,12 @@ test('@claim:demo-isolation keeps every demo entry path separate from a saved ti
     await expect(page.locator('.archive-meta')).toContainText('semantic.json');
   }
 });
-test('@claim:offline-reload keeps the shipped sample usable offline after first visit', async ({ page, context }) => {
-  await demo(page); await page.evaluate(() => navigator.serviceWorker.ready); await context.setOffline(true); await page.reload();
-  await expect(page.getByText('Harbor City Museum')).toBeVisible(); await expect(page.getByLabel('Search places and activities')).toBeVisible(); await expect(page.getByText('Offline')).toBeVisible();
+test.describe('offline service worker', () => {
+  test.use({ serviceWorkers: 'allow' });
+  test('@claim:offline-reload keeps the shipped sample usable offline after first visit', async ({ page, context }) => {
+    await demo(page); await page.evaluate(() => navigator.serviceWorker.ready); await context.setOffline(true); await page.reload();
+    await expect(page.getByText('Harbor City Museum')).toBeVisible(); await expect(page.getByLabel('Search places and activities')).toBeVisible(); await expect(page.getByText('Offline')).toBeVisible();
+  });
 });
 test('@claim:import-formats opens Timeline, Takeout, and Records fixtures', async ({ page }) => {
   await demo(page);
