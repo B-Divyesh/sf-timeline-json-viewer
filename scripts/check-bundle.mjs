@@ -5,7 +5,9 @@ const indexPath = resolve('dist/index.html');
 if (!existsSync(indexPath)) throw new Error('dist/index.html is missing. Run npm run build first.');
 
 const html = readFileSync(indexPath, 'utf8');
-const assetPaths = [...html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map((match) => match[1]);
+// Only count assets referenced by HTML tags. Dynamic imports in the inlined
+// shell are lazy and must not be mistaken for first-load attributes.
+const assetPaths = [...html.matchAll(/<(?:script|link)\b[^>]*(?:src|href)="(\/assets\/[^"]+)"[^>]*>/g)].map((match) => match[1]);
 const sizeFor = (extension) => assetPaths
   .filter((asset) => asset.endsWith(extension))
   .reduce((total, asset) => total + statSync(resolve('dist', asset.slice(1))).size, 0);

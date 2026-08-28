@@ -15,11 +15,11 @@ const inlineOfflineShell = () => ({
       const source = (await readFile(new URL(`.${script[1]}`, outputDirectory), 'utf8'))
         .replace(/\bimport\((["'])\.\/([^"']+)\1\)/g, (_match, quote, asset) => `import(${quote}${assetDirectory}${asset}${quote})`)
         .replace(/\n\/\/# sourceMappingURL=.*$/, '');
-      html = html.replace(script[0], `<script type="module">${source}</script>`);
+      html = html.replace(script[0], () => `<script type="module">${source}</script>`);
     }
     if (style) {
       const source = await readFile(new URL(`.${style[1]}`, outputDirectory), 'utf8');
-      html = html.replace(style[0], `<style>${source}</style>`);
+      html = html.replace(style[0], () => `<style>${source}</style>`);
     }
     await writeFile(indexPath, html);
   }

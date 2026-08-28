@@ -22,4 +22,4 @@ Motion is limited to a 180 ms paper-panel transition and a 600 ms one-shot route
 
 ## Original assets and provenance
 
-The folded-map/route icon in `public/icons/atlas.svg` was hand-authored for this product from basic SVG paths on 2026-08-27. PNG install icons reproduce that geometry through a local ImageMagick raster draw. No stock, generated, or third-party visual assets are used. OpenStreetMap tiles, when a user explicitly enables them while online, retain the required © OpenStreetMap attribution.
+The folded-map/route icon in `public/icons/atlas.svg` was hand-authored for this product from basic SVG paths on 2026-08-27. PNG install icons reproduce that geometry through a local ImageMagick raster draw. The social card and 180 px Apple touch icon added on 2026-08-28 were composed locally from that same hand-authored geometry; they use no stock or generated imagery. OpenStreetMap tiles, when a user explicitly enables them while online, retain the required © OpenStreetMap attribution.

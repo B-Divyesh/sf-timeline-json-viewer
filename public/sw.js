@@ -1,4 +1,4 @@
-const VERSION = 'field-atlas-v1.0.2';
+const VERSION = 'field-atlas-v1.0.3';
 const SHELL = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 const PRECACHE = [

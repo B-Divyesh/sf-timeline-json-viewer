@@ -27,7 +27,7 @@ self.onmessage = async (event: MessageEvent<{ file: File }>) => {
     send({ type: 'progress', progress: 42, message: 'Checking JSON structure…' });
     send({ type: 'progress', progress: 65, message: 'Building the day ledger…' });
     const dataset = parseTimelineText(text, file.name);
-    send({ type: 'progress', progress: 92, message: 'Preparing the local archive…' });
+    send({ type: 'progress', progress: 92, message: 'Preparing the saved timeline…' });
     send({ type: 'complete', dataset });
   } catch (error) {
     send({ type: 'error', message: error instanceof Error ? error.message : 'The file could not be read.' });

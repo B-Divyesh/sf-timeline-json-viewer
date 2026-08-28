@@ -34,6 +34,22 @@ export function eventsToGpx(events: TimelineEvent[]): string {
   return parts.join('\n');
 }
 
+export function eventsToKml(events: TimelineEvent[]): string {
+  const parts = ['<?xml version="1.0" encoding="UTF-8"?>', '<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Field Atlas export</name>'];
+  for (const event of events) {
+    const description = [event.start, event.end, event.address, event.activity].filter(Boolean).map(xml).join(' · ');
+    if (event.kind === 'visit' && event.points[0]) {
+      const point = event.points[0];
+      parts.push(`<Placemark><name>${xml(event.name)}</name><description>${description}</description><TimeSpan><begin>${xml(event.start)}</begin><end>${xml(event.end)}</end></TimeSpan><Point><coordinates>${point.lng},${point.lat},0</coordinates></Point></Placemark>`);
+    } else if (event.points.length) {
+      const coordinates = event.points.map((point) => `${point.lng},${point.lat},0`).join(' ');
+      parts.push(`<Placemark><name>${xml(event.name)}</name><description>${description}</description><TimeSpan><begin>${xml(event.start)}</begin><end>${xml(event.end)}</end></TimeSpan><LineString><tessellate>1</tessellate><coordinates>${coordinates}</coordinates></LineString></Placemark>`);
+    }
+  }
+  parts.push('</Document></kml>');
+  return parts.join('');
+}
+
 export function download(text: string, type: string, filename: string): void {
   const url = URL.createObjectURL(new Blob([text], { type }));
   const anchor = document.createElement('a');

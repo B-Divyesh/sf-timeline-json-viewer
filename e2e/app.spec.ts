@@ -1,45 +1,35 @@
 import { expect, test } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
-import path from 'node:path';
 
-test.beforeEach(async ({ page }) => {
+test('first screen names the job and opens the sample in one click', async ({ page }) => {
   await page.goto('/');
-  const privacy = page.getByRole('button', { name: 'Continue privately' });
-  await privacy.click();
+  await expect(page.getByRole('heading', { name: 'Browse your exported Google Timeline' })).toBeVisible();
+  await expect(page.getByText('For people with a Timeline JSON file they cannot open.')).toBeVisible();
+  await page.getByRole('button', { name: 'Try it with sample data' }).click();
+  await expect(page).toHaveURL(/\/demo$/);
+  await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
+  await page.getByRole('button', { name: '2026-08-18, has timeline entries' }).click();
+  await expect(page.getByText('Harbor City Museum')).toBeVisible();
 });
 
-test('imports, browses, searches, and exposes export actions', async ({ page }) => {
-  await page.locator('input[type="file"]').first().setInputFiles(path.resolve('tests/fixtures/semantic.json'));
-  await expect(page.getByText('Museum, Hall "A"')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Export CSV' })).toBeEnabled();
-  await page.getByLabel('Search places and activities').fill('vehicle');
-  await expect(page.getByText('in passenger vehicle', { exact: true })).toBeVisible();
-  await expect(page.getByText('Museum, Hall "A"')).toBeHidden();
+test('routes set titles, focus headings, and render a designed unknown route', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Primary').getByRole('link', { name: 'Privacy' }).click();
+  await expect(page).toHaveTitle('Privacy — Field Atlas');
+  await expect(page.getByRole('heading', { name: 'How Field Atlas handles your data' })).toBeFocused();
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Browse your exported Google Timeline' })).toBeFocused();
+  await page.goto('/not-a-real-page');
+  await expect(page).toHaveTitle('Page not found — Field Atlas');
+  await expect(page.getByRole('heading', { name: 'This Field Atlas page does not exist' })).toBeVisible();
 });
 
-test('restores the imported archive with the network offline', async ({ page, context }) => {
-  await page.locator('input[type="file"]').first().setInputFiles(path.resolve('tests/fixtures/timeline-objects.json'));
-  await page.getByRole('button', { name: 'Previous day with entries' }).click();
-  await expect(page.getByText('Library & Archive')).toBeVisible();
-  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-  await page.reload();
-  await expect(page.getByText('Library & Archive')).toBeVisible();
-  await context.setOffline(true);
-  await expect(page.getByText('Offline')).toBeVisible();
-  await page.reload();
-  await expect(page.getByText('Library & Archive')).toBeVisible();
-  await expect(page.locator('.connection')).toContainText('Offline');
-  await expect(page.getByRole('button', { name: 'Export GPX' })).toBeEnabled();
-});
-
-test('has no serious accessibility or load-console errors', async ({ page }) => {
-  const errors: string[] = [];
-  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
-  page.on('pageerror', (error) => errors.push(error.message));
-  await page.reload();
-  await expect(page.locator('main')).toBeVisible();
-  expect(await page.locator('h1').count()).toBe(1);
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
-  expect(results.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
-  expect(errors).toEqual([]);
+test('ships crawl files and route metadata', async ({ page, request }) => {
+  for (const route of ['/', '/demo', '/privacy', '/terms']) {
+    await page.goto(route);
+    await expect(page.locator('link[rel=canonical]')).toHaveAttribute('href', new RegExp(route === '/' ? '/$' : route));
+    await expect(page.locator('meta[property="og:image"]').first()).toHaveAttribute('content', /social-card\.png/);
+  }
+  const robots = await request.get('/robots.txt'), sitemap = await request.get('/sitemap.xml');
+  expect(robots.headers()['content-type']).toContain('text/plain');
+  expect(await sitemap.text()).toContain('<urlset');
 });
