@@ -1,19 +1,52 @@
-# Review 2 handoff — Field Atlas
+# Polish 2 handoff — Field Atlas
 
-Work order: `timeline-json-viewer-review-2`
-Reviewed commit: `a1ebd79fda6d47f6074bbeb87d603d28f8bf0009`
+Work order: `timeline-json-viewer-polish-2`
+Product deployment commits: `e9fc1b225eea140aef1a23491bc9307f88e9e7e0`, `58b43088b80542af8008606cfab00cc46f4ce74f`
 
 ## Done
 
-- Performed an adversarial cold first-read review of the live site at 390 px and desktop, including demo, privacy, offline, routing, links, metadata, and visual checks.
-- Read the brief, design, claims registry, demo documentation, all earlier review/polish/verification records, and the prior handoff.
-- Wrote the detailed result to `.factory/review-2.md`. No product code was changed.
+- Closed every finding in `review-1.md` and `review-2.md`; the full ID-to-change-to-evidence map is in `polish-2.md`.
+- Added three missing enforceable claims: real saved-timeline persistence, map-tile request privacy, and demo discard. Real-store reads now avoid creating an empty real IndexedDB database.
+- Removed duplicate SPA descriptions, set route-specific descriptions, and completed cold-static-404 metadata.
+- Replaced the stale footer commit label with `Version 1.0.0`.
+- Updated the verb-first catalog description and copy audit. The archival field-atlas visual system is unchanged.
 
-## Verification run
+## Verification
 
-After `npm ci` in the clean reviewed tree:
+Clean clone: `/tmp/timeline-json-viewer-clean.rIbIEN`, cloned from `origin/main` at `e9fc1b2` before the footer-only follow-up.
+
+| Check | Result |
+|---|---|
+| `npm ci` | PASS — 91 packages, 0 vulnerabilities |
+| `npm run check` | PASS — 0 errors, 0 warnings |
+| `npm test` | PASS — 7/7 unit tests |
+| `npm run build` | PASS — `dist/` produced |
+| `npm run check:bundle` | PASS — initial JS 73,869 B; CSS 17,130 B; fonts 0 B |
+| Every declared claim command from the clean clone | PASS — 15 commands, 2 browser projects each, 30 cases total |
+| `npm run test:e2e` | PASS — 42/42 local browser cases after the footer follow-up |
+| `npm run test:axe` | PASS — 2/2 serious/critical populated-state audits |
+| Live `npm run test:claims` | PASS — 30/30 at `https://timeline-json-viewer.sociobot.in` |
+| Live `npm run test:e2e` | PASS — 42/42 at the custom domain |
+| Live `npm run test:axe` | PASS — 2/2 at the custom domain |
+| Live Lighthouse mobile demo | PASS — Performance 99, Accessibility 100, LCP 1.1 s, CLS 0 |
+
+The live 404 check returned HTTP 404, `text/html`, and its noindex description, canonical `/404`, OG/Twitter card, SVG favicon, and Apple touch icon. The deployed footer was checked cold and shows `Version 1.0.0`.
+
+## Deployment and evidence
+
+Deployed through `/opt/fleet/lib/deploy-static.sh timeline-json-viewer dist` using the work-order static configuration. Azure Static Web Apps reported deployment `a21dd924-d7af-44b0-9664-fe56230c3ad5` successful; the final custom-domain artifact was rebuilt and deployed for `58b4308`.
+
+Live demo screenshots (fresh contexts):
+
+- `/tmp/field-atlas-polish-2-desktop-final.png`
+- `/tmp/field-atlas-polish-2-mobile-final.png`
+
+Live URL: <https://timeline-json-viewer.sociobot.in/?demo=1>
+
+## Run locally
 
 ```sh
+npm ci
 npm run check
 npm test
 npm run build
@@ -23,14 +56,4 @@ npm run test:axe
 npm run test:claims
 ```
 
-All commands passed: 0 check errors/warnings, 7 unit tests, build output, 34 end-to-end tests, 2 axe tests, and 24 claim-test cases (12 declared claims across desktop and mobile).
-
-## Result and remaining work
-
-Verdict is **FAIL**. The review records three blocking claim-accountability issues:
-
-- Real saved-timeline persistence is claimed but only demo persistence is tested (F-1-21 recurrence).
-- Optional OpenStreetMap tile privacy disclosure is not tested with a request log (F-1-23 recurrence).
-- Demo discard on “Start for real” is claimed but not registered/tested (F-2-1).
-
-It also records duplicate SPA meta descriptions (F-2-2) and incomplete cold static-404 metadata (F-2-3). The live demo itself, core importer/exporter flows, offline demo behavior, and declared claims currently work.
+No known gaps remain.

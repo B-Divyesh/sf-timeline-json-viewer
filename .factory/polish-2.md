@@ -69,4 +69,8 @@ This round rechecked every finding in `review-1.md` and `review-2.md`. Evidence 
 | F-2-2 | Removed static description; Svelte supplies exactly one route description. | `ships crawl files and route metadata` |
 | F-2-3 | Added description, canonical, OG/Twitter card, and Apple icon to `404.html`. | `the static 404 includes complete noindex metadata` |
 
-No finding is deferred. The visual system remains the warm-paper archival field atlas documented in `design.md`.
+## Live recheck
+
+Deployment commit: `58b43088b80542af8008606cfab00cc46f4ce74f` (the claim/metadata repair is `e9fc1b225eea140aef1a23491bc9307f88e9e7e0`). The custom domain was opened from fresh desktop and Pixel 7 contexts at <https://timeline-json-viewer.sociobot.in/?demo=1>. The direct demo rendered its banner, isolated sample, calendar, itinerary, private plot, exports, and `Version 1.0.0` footer in both. Screenshots: `/tmp/field-atlas-polish-2-desktop-final.png` and `/tmp/field-atlas-polish-2-mobile-final.png`.
+
+The live replay passed all 15 declared claim commands (30 project cases), the full 42-case browser suite, and both populated-state axe cases. A cold request to <https://timeline-json-viewer.sociobot.in/not-a-real-page> returned HTTP 404 with the designed static page, one description, canonical URL, social card metadata, and Apple touch icon. No finding is deferred. The visual system remains the warm-paper archival field atlas documented in `design.md`.
