@@ -1,1 +1,1 @@
-Browse exported Google Timeline JSON privately, with sample data and CSV, GPX, or KML exports.
+Browse exported Google Timeline JSON privately and export selected days as CSV, GPX, or KML.

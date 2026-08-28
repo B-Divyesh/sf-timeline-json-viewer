@@ -18,6 +18,15 @@ function open(scope: StorageScope = 'real'): Promise<IDBDatabase> {
   });
 }
 
+async function hasDatabase(scope: StorageScope): Promise<boolean> {
+  // `indexedDB.open()` creates an empty database as a side effect.  Avoid that
+  // for reads so landing on the real importer cannot create or touch real
+  // storage while a visitor is using the sample sandbox.
+  if (!('databases' in indexedDB)) return true;
+  const databases = await indexedDB.databases();
+  return databases.some((database) => database.name === databaseName(scope));
+}
+
 export async function saveDataset(dataset: TimelineDataset, scope: StorageScope = 'real'): Promise<void> {
   const db = await open(scope);
   await new Promise<void>((resolve, reject) => {
@@ -30,6 +39,7 @@ export async function saveDataset(dataset: TimelineDataset, scope: StorageScope 
 }
 
 export async function loadDataset(scope: StorageScope = 'real'): Promise<TimelineDataset | undefined> {
+  if (!await hasDatabase(scope)) return undefined;
   const db = await open(scope);
   const result = await new Promise<TimelineDataset | undefined>((resolve, reject) => {
     const request = db.transaction(STORE).objectStore(STORE).get('current');

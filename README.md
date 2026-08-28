@@ -39,7 +39,7 @@ node -e "for (const claim of require('./.factory/claims.json')) console.log(clai
 
 ## Privacy and limits
 
-A saved timeline stays in this browser until you remove it or clear site data. OpenStreetMap tile images are optional and expose approximate viewed map areas and your IP address to OpenStreetMap.
+A saved timeline stays in this browser until you remove it or clear site data. Optional tile requests send map-image GETs, not Timeline JSON data.
 
 Google changes export formats. Keep the original Timeline JSON as your backup.
 

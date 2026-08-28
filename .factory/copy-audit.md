@@ -16,6 +16,16 @@
 
 No sentence exceeds 22 words. No banned terms occur.
 
+## Round 2 privacy copy
+
+| Words | Copy | Status |
+|---:|---|---|
+| 15 | A saved timeline stays in this browser until you remove it or clear site data. | claim: real-local-persistence |
+| 11 | Optional tile requests send map-image GETs, not Timeline JSON data. | claim: tile-request-privacy |
+| 9 | Starting for real discards the isolated demo timeline. | claim: demo-discard |
+
+All revised visitor copy is below 22 words and uses the existing Timeline JSON/saved timeline terminology.
+
 ## Terminology
 
 | Concept | One term |
