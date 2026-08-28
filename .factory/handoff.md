@@ -1,57 +1,60 @@
-# Review 3 handoff — Field Atlas
+# Polish 3 handoff — Field Atlas
 
-Work order: `timeline-json-viewer-review-3`
+Work order: `timeline-json-viewer-polish-3`
 
-Reviewed commit: `9369cf53d871db563587a2750d90d9766edbc1f9`
-Verdict: **FAIL**
+Reviewed candidate: `9369cf53d871db563587a2750d90d9766edbc1f9`
+
+Review report: `940b56a0928ec1b0ec9bc728b2b838e9933f293a`
+
+Deployed implementation: `0ba8555c051d7071a32d33a132d1e54b7cb7be15`
+Live URL: <https://timeline-json-viewer.sociobot.in>
 
 ## Done
 
-- Performed fresh 390 × 844 and 1440 × 900 first-read checks without scrolling.
-- Exercised direct demo, reset, real/demo storage, request logging, offline reload, route focus, Back, deep links, metadata, 404, crawl files, dead links, and visual identity on the live site.
-- Read the brief, design, claims, demo documentation, both prior reviews, both polish maps, and the previous handoff.
-- Rechecked every earlier review finding against live behavior and source.
-- Ran every declared claim command separately from a clean clone at the reviewed commit.
-- Added only `.factory/review-3.md` and this handoff; no product code was changed.
+- Made destination route state explicit before reading IndexedDB, so Demo can never render a real saved timeline and legal-page Demo links always seed the sample.
+- Preserved and restored the real workspace through Privacy, Back, Forward, Demo, Reset demo, and Start for real.
+- Expanded `@claim:demo-isolation` to seed real data and test every reported transition on desktop and mobile.
+- Replaced the first-screen facts with explicit upload, offline, and free statements; added `@claim:free-to-use`.
+- Added exact sample-content coverage, `/?demo=1` canonical coverage, 390 × 844 fold coverage, and full public-route axe coverage.
+- Completed the static 404 with the Field Atlas header, skip link, navigation, footer, legal links, version, and factory credit.
+- Removed the unsupported adjective, vague export heading, service-worker jargon claim, HTTP jargon, and inconsistent product label.
+- Deferred service-worker registration until after page load and limited browser suites to one intentional worker lifecycle: the offline claim. This removed the live navigation/readiness race without weakening offline coverage.
+- Updated the PWA cache version, demo documentation, catalog description, claims registry, copy audit, and review mapping.
 
 ## Verification
 
-Clean clone: `/tmp/timeline-review3.tiVgrB/repo`
+Final clean clone: `/tmp/timeline-polish3-final.VRQeY4/repo` at `0ba8555`.
 
-| Command/check | Result |
+| Check | Result |
 |---|---|
-| `npm ci` | PASS — 91 packages, 0 vulnerabilities |
-| Every `.factory/claims.json` command | PASS — 15 commands, 30/30 browser cases |
-| `npm run check` | PASS — 0 errors, 0 warnings |
-| `npm test` | PASS — 7/7 |
-| `npm run build` | PASS — `dist/` produced |
-| `npm run check:bundle` | PASS — initial JS 73,869 B; CSS 17,130 B; fonts 0 B |
-| `npm run test:e2e` | PASS — 42/42 |
-| `npm run test:axe` | PASS — 2/2 |
-| Live `TARGET_URL=https://timeline-json-viewer.sociobot.in npm run test:axe` | PASS — 2/2 |
-| Live `verify-url.sh` | PASS — one h1/main, title/lang/alt/labels, no console errors |
-| Live private demo flow | PASS — only same-origin bodyless GETs; offline reload retained data |
-| Live real-data → Demo transition | **FAIL — real `semantic.json` rendered under the demo banner** |
-| Live Privacy/Terms → Demo transition | **FAIL — empty importer rendered instead of sample** |
-| Live populated workspace → Privacy → Back | **FAIL — importer replaced the saved workspace until reload** |
+| `npm ci` | PASS — 91 packages, 0 vulnerabilities. |
+| Every command in `.factory/claims.json`, separately | PASS — 16 commands, 32/32 project cases. |
+| `npm run check` | PASS — 0 errors, 0 warnings. |
+| `npm test` | PASS — 7/7 unit tests. |
+| `npm run build` | PASS — `dist/` produced. |
+| `npm run check:bundle` | PASS — initial JS 74,603 B; CSS 17,130 B; fonts 0 B. |
+| `npm run test:e2e` | PASS — 50/50 browser cases. |
+| `npm run test:axe` | PASS — 4/4 desktop/mobile route audits. |
+| Live `npm run test:e2e`, consecutive run 1 | PASS — 50/50 in 54.0 s. |
+| Live `npm run test:e2e`, consecutive run 2 | PASS — 50/50 in 47.4 s. |
+| Live `npm run test:axe` | PASS — 4/4. |
+| Live `verify-url.sh` on `/` | PASS — 200, 712 ms, one h1/main, no missing alt, no unlabeled buttons, no console errors. |
+| Live `verify-url.sh` on `/?demo=1` | PASS — 200, 671 ms, Demo title, one h1/main, no console errors. |
+| Live cold transition replay | PASS — only `Sample Timeline JSON` in Demo; real `semantic.json` unchanged; Reset and Start for real correct; Back focused the restored h1. |
+| Live cold unknown URL | PASS — HTTP 404 with skip link, header/navigation, footer, Privacy, Terms, version, and factory credit. |
+| Live Lighthouse mobile | PASS — performance 99, accessibility 100, best practices 100, SEO 100; LCP 1.1 s, CLS 0.009, TBT 100 ms. |
 
-## Remaining work
+The first post-deploy run of the earlier implementation found the historical service-worker race (47/50). Commit `0ba8555` fixed its cause; both full live runs above are after that fix and contain no retry or failure.
 
-`.factory/review-3.md` contains ten findings. Three are blocking: demo isolation/claim coverage, saved-state Back routing, and the incomplete required first-screen fact set. The remaining work is the static 404 chrome, query-demo canonical, and five copy corrections.
+## Evidence files
 
-The key regression is in `src/App.svelte`: `changeRoute()` updates `path` and immediately calls `initialize()`, while storage scope and legal/demo flags are reactive derived values that can still describe the previous route. Tests must seed real data before navigating into demo and must preserve a populated workspace through browser history.
+- Root: `/tmp/field-atlas-polish-3-live/root/screenshot-desktop.png`, `/tmp/field-atlas-polish-3-live/root/screenshot-mobile.png`
+- Direct demo: `/tmp/field-atlas-polish-3-live/demo/screenshot-desktop.png`, `/tmp/field-atlas-polish-3-live/demo-cold-mobile.png`
+- Demo entered after real data: `/tmp/field-atlas-polish-3-live/demo-after-real.png`
+- Cold 404: `/tmp/field-atlas-polish-3-live/404-cold-mobile.png`
+- Lighthouse JSON: `/tmp/field-atlas-polish-3-live/lighthouse.json`
+- Deployment ID: `3d8501af-5c33-49f6-bc3d-385a00561dca`
 
-## Re-run
+## Known gaps and next steps
 
-```sh
-npm ci
-npm run check
-npm test
-npm run build
-npm run check:bundle
-npm run test:e2e
-npm run test:axe
-node -e "for (const claim of require('./.factory/claims.json')) console.log(claim.test)" | while read command; do eval "$command"; done
-```
-
-Also run the new route-transition tests against the live custom domain. Passing the current suite alone is not sufficient because it does not reproduce the blocking state transitions.
+No review finding, claim, test failure, or release blocker remains. Deployment infrastructure, DNS, and billing remain outside this repository as required.
